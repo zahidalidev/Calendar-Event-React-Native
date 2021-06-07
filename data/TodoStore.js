@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AsyncStorage } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import moment from 'moment';
 import { Context } from './Context';
 
@@ -130,7 +130,7 @@ export default class TodoStore extends Component {
     }
   };
 
-  _deleteTodo = () => {};
+  _deleteTodo = () => { };
 
   render() {
     return (

@@ -3,7 +3,6 @@ import {
   View,
   Image,
   TouchableOpacity,
-  AsyncStorage,
   ScrollView,
   Text,
   Dimensions,
@@ -17,6 +16,7 @@ import moment from 'moment';
 import * as Calendar from 'expo-calendar';
 import * as Localization from 'expo-localization';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import CalendarStrip from 'react-native-calendar-strip';
 import DateTimePicker from 'react-native-modal-datetime-picker';
@@ -167,6 +167,60 @@ export default class Home extends Component {
     this._handleDeletePreviousDayTask();
   }
 
+  // JSON.stringify
+  componentDidMount = async () => {
+
+    try {
+      const value = await AsyncStorage.getItem('TODO');
+      // const ids = [];
+      if (value !== null) {
+        const todoList = JSON.parse(value);
+        // todoList.map(item => {
+        //   item.todoList.map(todo => {
+        //     // ids.push(todo.alarm.createEventAsyncRes)
+        //   })
+        // })
+
+        // let validIds = [];
+        // for (let i = 0; i < ids.length; i++) {
+        //   try {
+        //     const res = await Calendar.getEventAsync(ids[i])
+        //     validIds.push(res.id)
+        //   } catch (error) {
+
+        //   }
+        // }
+
+        let newList = [];
+        console.log(todoList)
+        for (let i = 0; i < todoList.length; i++) {
+          let tod = todoList[i];
+
+          for (let j = 0; j < tod.todoList.length; j++) {
+            let obj = tod.todoList[j]
+            if (obj.alarm.isOn) {
+              try {
+                const res = await Calendar.getEventAsync(obj.alarm.createEventAsyncRes)
+                tod.todoList[j].notes = res.notes;
+                tod.todoList[j].title = res.title;
+              } catch (error) {
+                tod.todoList.splice(j, 1)
+                j--;
+              }
+            }
+          }
+          if (tod.todoList.length > 0) {
+            newList.push(tod)
+          }
+        }
+        await AsyncStorage.setItem('TODO', JSON.stringify(newList));
+
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   _handleDeletePreviousDayTask = async () => {
     const { currentDate } = this.state;
     try {
@@ -223,6 +277,7 @@ export default class Home extends Component {
           }
           return false;
         });
+        // console.log(todoLists)
         if (todoLists.length !== 0) {
           this.setState({
             markedDate: markDot,
@@ -314,7 +369,7 @@ export default class Home extends Component {
 
   _deleteAlarm = async () => {
     const { selectedTask } = this.state;
-    console.log(selectedTask.alarm);
+    // console.log(selectedTask.alarm);
 
     try {
       await Calendar.deleteEventAsync(selectedTask.alarm.createEventAsyncRes);
@@ -351,6 +406,7 @@ export default class Home extends Component {
 
   _createNewCalendar = async () => {
     const calendars = await this._findCalendars();
+
     const newCalendar = {
       title: 'test',
       entityType: Calendar.EntityTypes.EVENT,
@@ -682,6 +738,7 @@ export default class Home extends Component {
                 }}
               >
                 <ScrollView
+
                   contentContainerStyle={{
                     paddingBottom: 20,
                   }}

@@ -189,12 +189,13 @@ export default class CreateTask extends Component {
     const calendarId = await createNewCalendar();
     try {
       const createEventAsyncRes = await this._addEventsToCalendar(calendarId);
+      console.log(createEventAsyncRes)
       this.setState(
         {
           createEventAsyncRes,
         },
         () => {
-          this._handleCreateEventData(value);
+          this._handleCreateEventData(value, createEventAsyncRes);
         }
       );
     } catch (e) {
@@ -232,7 +233,7 @@ export default class CreateTask extends Component {
 
   _hideDateTimePicker = () => this.setState({ isDateTimePickerVisible: false });
 
-  _handleCreateEventData = async value => {
+  _handleCreateEventData = async (value, id = "noCalender") => {
     const {
       state: {
         currentDay,
@@ -249,6 +250,7 @@ export default class CreateTask extends Component {
     const { updateCurrentTask, currentDate } = this.props.route.params;
 
     const creatTodo = {
+      id,
       key: uuid(),
       date: `${moment(currentDay).format('YYYY')}-${moment(currentDay).format(
         'MM'
