@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Alert,
   Platform,
+  RefreshControl
 } from 'react-native';
 import moment from 'moment';
 import * as Calendar from 'expo-calendar';
@@ -161,6 +162,20 @@ export default class Home extends Component {
     isModalVisible: false,
     selectedTask: null,
     isDateTimePickerVisible: false,
+    refreshing: false,
+    render: false,
+  };
+
+  onRefresh = async () => {
+    this.setState({ refreshing: true });
+    await this.componentDidMount();
+    let date = new Date()
+    const selectedDate = `${moment(date).format('YYYY')}-${moment(
+      date
+    ).format('MM')}-${moment(date).format('DD')}`;
+
+    this.calenderRef.setSelectedDate(selectedDate)
+    this.setState({ refreshing: false });
   };
 
   UNSAFE_componentWillMount() {
@@ -192,7 +207,7 @@ export default class Home extends Component {
         // }
 
         let newList = [];
-        console.log(todoList)
+        // console.log(todoList)
         for (let i = 0; i < todoList.length; i++) {
           let tod = todoList[i];
 
@@ -214,7 +229,6 @@ export default class Home extends Component {
           }
         }
         await AsyncStorage.setItem('TODO', JSON.stringify(newList));
-
       }
     } catch (error) {
       console.log(error)
@@ -738,95 +752,101 @@ export default class Home extends Component {
                 }}
               >
                 <ScrollView
-
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={this.state.refreshing}
+                      onRefresh={this.onRefresh.bind(this)}
+                    />
+                  }
                   contentContainerStyle={{
                     paddingBottom: 20,
                   }}
                 >
                   {todoList.map(item => (
-                    <TouchableOpacity
-                      onPress={() => {
-                        this.setState(
-                          {
-                            selectedTask: item,
-                            isModalVisible: true,
-                          },
-                          () => {
-                            this._getEvent();
-                          }
-                        );
-                      }}
-                      key={item.key}
-                      style={styles.taskListContent}
-                    >
-                      <View
-                        style={{
-                          marginLeft: 13,
+                    this.state.refreshing ? null :
+                      <TouchableOpacity
+                        onPress={() => {
+                          this.setState(
+                            {
+                              selectedTask: item,
+                              isModalVisible: true,
+                            },
+                            () => {
+                              this._getEvent();
+                            }
+                          );
                         }}
+                        key={item.key}
+                        style={styles.taskListContent}
                       >
                         <View
                           style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
+                            marginLeft: 13,
                           }}
                         >
                           <View
                             style={{
-                              height: 12,
-                              width: 12,
-                              borderRadius: 6,
-                              backgroundColor: item.color,
-                              marginRight: 8,
-                            }}
-                          />
-                          <Text
-                            style={{
-                              color: '#554A4C',
-                              fontSize: 20,
-                              fontWeight: '700',
-                            }}
-                          >
-                            {item.title}
-                          </Text>
-                        </View>
-                        <View>
-                          <View
-                            style={{
                               flexDirection: 'row',
-                              marginLeft: 20,
+                              alignItems: 'center',
                             }}
                           >
-                            <Text
+                            <View
                               style={{
-                                color: '#BBBBBB',
-                                fontSize: 14,
-                                marginRight: 5,
+                                height: 12,
+                                width: 12,
+                                borderRadius: 6,
+                                backgroundColor: item.color,
+                                marginRight: 8,
                               }}
-                            >{`${moment(item.alarm.time).format(
-                              'YYYY'
-                            )}/${moment(item.alarm.time).format('MM')}/${moment(
-                              item.alarm.time
-                            ).format('DD')}`}</Text>
+                            />
                             <Text
                               style={{
-                                color: '#BBBBBB',
-                                fontSize: 14,
+                                color: '#554A4C',
+                                fontSize: 20,
+                                fontWeight: '700',
                               }}
                             >
-                              {item.notes}
+                              {item.title}
                             </Text>
                           </View>
+                          <View>
+                            <View
+                              style={{
+                                flexDirection: 'row',
+                                marginLeft: 20,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  color: '#BBBBBB',
+                                  fontSize: 14,
+                                  marginRight: 5,
+                                }}
+                              >{`${moment(item.alarm.time).format(
+                                'YYYY'
+                              )}/${moment(item.alarm.time).format('MM')}/${moment(
+                                item.alarm.time
+                              ).format('DD')}`}</Text>
+                              <Text
+                                style={{
+                                  color: '#BBBBBB',
+                                  fontSize: 14,
+                                }}
+                              >
+                                {item.notes}
+                              </Text>
+                            </View>
+                          </View>
                         </View>
-                      </View>
-                      <View
-                        style={{
-                          height: 80,
-                          width: 5,
-                          backgroundColor: item.color,
-                          borderRadius: 5,
-                        }}
-                      />
-                    </TouchableOpacity>
+                        <View
+                          style={{
+                            height: 80,
+                            width: 5,
+                            backgroundColor: item.color,
+                            borderRadius: 5,
+                          }}
+                        />
+                      </TouchableOpacity>
                   ))}
                 </ScrollView>
               </View>
