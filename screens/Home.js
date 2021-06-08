@@ -187,6 +187,7 @@ export default class Home extends Component {
 
     try {
       const value = await AsyncStorage.getItem('TODO');
+      await AsyncStorage.removeItem('TODO');
       // const ids = [];
       if (value !== null) {
         const todoList = JSON.parse(value);
@@ -216,9 +217,42 @@ export default class Home extends Component {
             if (obj.alarm.isOn) {
               try {
                 const res = await Calendar.getEventAsync(obj.alarm.createEventAsyncRes)
-                tod.todoList[j].notes = res.notes;
-                tod.todoList[j].title = res.title;
+
+                if (tod.todoList[j].notes != res.notes || tod.todoList[j].title != res.title) {
+                  tod.todoList[j].notes = res.notes;
+                  tod.todoList[j].title = res.title;
+
+                  let date = new Date(tod.todoList[j].alarm.time)
+                  var pad = function (num) { return ('00' + num).slice(-2) };
+                  let newDate = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+
+                  const event = {
+                    title: tod.todoList[j].title,
+                    notes: tod.todoList[j].notes,
+                    startDate: moment(tod.todoList[j].alarm.time)
+                      .add(0, 'm')
+                      .toDate(),
+                    endDate: moment(tod.todoList[j].alarm.time)
+                      .add(5, 'm')
+                      .toDate(),
+                    timeZone: Localization.timezone,
+                  };
+
+                  await Calendar.updateEventAsync(
+                    tod.todoList[j].alarm.createEventAsyncRes.toString(),
+                    event
+                  );
+
+                }
+
               } catch (error) {
+                console.log("exp")
+                let date = new Date(tod.todoList[j].alarm.time)
+                var pad = function (num) { return ('00' + num).slice(-2) };
+                let newDate = `${date.getUTCFullYear()}-${pad(date.getUTCMonth() + 1)}-${pad(date.getUTCDate())}`;
+
+                await Calendar.deleteEventAsync(tod.todoList[j].alarm.createEventAsyncRes);
+
                 tod.todoList.splice(j, 1)
                 j--;
               }
@@ -303,6 +337,7 @@ export default class Home extends Component {
             todoList: [],
           });
         }
+
       }
     } catch (error) {
       // Error retrieving data
@@ -625,11 +660,14 @@ export default class Home extends Component {
                         } else {
                           await this._deleteAlarm();
                         }
+                        console.log(currentDate, selectedTask)
                         await value.updateSelectedTask({
                           date: currentDate,
                           todo: selectedTask,
                         });
                         this._updateCurrentTask(currentDate);
+
+                        this.onRefresh()
                       }}
                       style={styles.updateButton}
                     >
@@ -652,6 +690,7 @@ export default class Home extends Component {
                           todo: selectedTask,
                         });
                         this._updateCurrentTask(currentDate);
+                        this.onRefresh()
                       }}
                       style={styles.deleteButton}
                     >
@@ -732,6 +771,7 @@ export default class Home extends Component {
                     updateCurrentTask: this._updateCurrentTask,
                     currentDate,
                     createNewCalendar: this._createNewCalendar,
+                    forRefresh: this.onRefresh
                   })
                   }
 

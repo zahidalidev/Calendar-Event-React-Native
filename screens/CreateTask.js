@@ -189,7 +189,7 @@ export default class CreateTask extends Component {
     const calendarId = await createNewCalendar();
     try {
       const createEventAsyncRes = await this._addEventsToCalendar(calendarId);
-      console.log(createEventAsyncRes)
+      // console.log(createEventAsyncRes)
       this.setState(
         {
           createEventAsyncRes,
@@ -198,6 +198,7 @@ export default class CreateTask extends Component {
           this._handleCreateEventData(value, createEventAsyncRes);
         }
       );
+
     } catch (e) {
       Alert.alert(e.message);
     }
@@ -250,7 +251,6 @@ export default class CreateTask extends Component {
     const { updateCurrentTask, currentDate } = this.props.route.params;
 
     const creatTodo = {
-      id,
       key: uuid(),
       date: `${moment(currentDay).format('YYYY')}-${moment(currentDay).format(
         'MM'
@@ -518,6 +518,8 @@ export default class CreateTask extends Component {
                       if (!isAlarmSet) {
                         this._handleCreateEventData(value);
                       }
+
+                      this.props.route.params.forRefresh()
                     }}
                   >
                     <Text
