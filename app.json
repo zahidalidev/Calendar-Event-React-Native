@@ -1,20 +1,14 @@
 {
   "expo": {
-    "name": "notificationapp",
-    "slug": "notificationapp",
-    "privacy": "public",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "name": "notification-app",
+    "slug": "snack-baa4ed45-b758-4b3e-9954-7f4a3df79c0b",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#ffffff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -24,6 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true
-    }
+    },
+    "android": {}
   }
 }
