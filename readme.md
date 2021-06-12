@@ -9,13 +9,13 @@ This app will save your calender event in your native iOS and android calender.
 ### Installation
 
 ```
-yarn install
+npm install
 ```
 
 ## Video
 
 <div align="center">
-  <a href="https://www.youtube.com/watch?v=cXvFcI8FxdA"><img src="https://img.youtube.com/vi/cXvFcI8FxdA/0.jpg" alt="IMAGE ALT TEXT"></a>
+ 
 </div>
 
 ### Screenshots
